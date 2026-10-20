@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   DESIGN TOKENS — "The Digital Homeland"
+   --------------------------------------------------------------------------
+   Every colour in the site comes from these variables. To restyle the whole
+   website, change values here. Dark is the default; the light theme is a
+   separate warm "paper" palette, not an inverted copy.
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  --bg: #07080a; /* deep night */
+  --surface: #0d0f12; /* raised panels */
+  --fg: #ecebe6; /* soft white text */
+  --muted: #9a9a94; /* secondary text */
+  --line: rgba(255, 255, 255, 0.1); /* fine borders */
+  --accent: #f0a64a; /* warm amber: light emerging from darkness */
+  --accent-fg: #14100a; /* text placed on top of the accent */
+
+  --glow: rgba(240, 166, 74, 0.1); /* dawn glow behind the mountains */
+  --star-opacity: 1;
+  --grid-opacity: 0.5;
+
+  --mtn-far: #14161b;
+  --mtn-mid: #0f1115;
+  --mtn-near: #0a0b0e;
+}
+
+[data-theme="light"] {
+  --bg: #f6f3ec; /* warm paper */
+  --surface: #efebe1;
+  --fg: #141414;
+  --muted: #5b5a55;
+  --line: rgba(20, 20, 20, 0.14);
+  --accent: #a85400; /* deeper amber so text stays readable on paper */
+  --accent-fg: #fffaf2;
+
+  --glow: rgba(168, 84, 0, 0.09);
+  --star-opacity: 0; /* no stars in daylight */
+  --grid-opacity: 0.7;
+
+  --mtn-far: #e3ddcd;
+  --mtn-mid: #d3ccb9;
+  --mtn-near: #c2baa4;
+}
+
+/* Tailwind v4: `@theme inline` turns the variables above into utility
+   classes such as bg-bg, text-fg, text-muted, border-line, text-accent. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+}
+
+/* Fonts live in a `static` block so Tailwind ALWAYS writes these variables
+   into the CSS (our own rules below read them with var(--font-...)). */
+@theme static {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* Restrained theme transition: colour only, nothing that moves. */
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   SMALL REUSABLE PIECES
+   ========================================================================== */
+
+@layer components {
+  /* Little mono label used above headings, like a blueprint annotation */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* The night sky: warm glow rising from the bottom of the screen */
+  .sky-glow {
+    background: radial-gradient(
+      ellipse 80% 45% at 50% 100%,
+      var(--glow),
+      transparent 70%
+    );
+  }
+
+  /* Faint architectural grid, fading out toward the bottom */
+  .blueprint-grid {
+    opacity: var(--grid-opacity);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 75%);
+    mask-image: linear-gradient(to bottom, black 0%, transparent 75%);
+  }
+
+  /* Skill bars: solid = current strength, striped = still developing */
+  .bar-strength {
+    background: var(--accent);
+  }
+  .bar-developing {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--accent) 0 4px,
+      transparent 4px 8px
+    );
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  /* Background for empty photo slots */
+  .blueprint-grid-static {
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .star {
+    position: absolute;
+    border-radius: 9999px;
+    background: var(--fg);
+    animation: twinkle 5s ease-in-out infinite;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--o);
+  }
+  50% {
+    opacity: calc(var(--o) * 0.25);
+  }
+}
+
+/* While the theme is switching, ThemeContext adds the class "theme-switching"
+   to <html> for a moment, so borders, surfaces and icons fade together
+   instead of snapping. It is removed again right after. */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    fill 0.4s ease !important;
+}
+
+/* Small "scroll" cue in the hero: a line that slowly travels downward */
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION — respect the visitor's system setting
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition: none !important;
+  }
+}
